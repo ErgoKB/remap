@@ -1,6 +1,7 @@
 {
   "name": "Remap",
   "version": "0.2.3",
+  "homepage": "./",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.7.1",

@@ -31,9 +31,13 @@ import LightingDialog from '../lighting/LightingDialog';
 import LayoutOptionPopover from '../layoutoption/LayoutOptionPopover.container';
 import { ImportFileIcon } from '../../common/icons/ImportFileIcon';
 import ImportDefDialog from '../importDef/ImportDefDialog.container';
+<<<<<<< HEAD
 import SwapHorizRoundedIcon from '@mui/icons-material/SwapHorizRounded';
 import ViewComfyIcon from '@mui/icons-material/ViewComfy';
 import KeymapListPopover from '../keymaplist/KeymapListPopover.container';
+=======
+import ViewComfyIcon from '@material-ui/icons/ViewComfy';
+>>>>>>> 3134e7f (remove unwanted buttons and home path)
 import { sendEventToGoogleAnalytics } from '../../../utils/GoogleAnalytics';
 import { Restore as RestoreIcon } from '@mui/icons-material';
 
@@ -265,26 +269,6 @@ export default class KeymapMenu extends React.Component<
               />
             </div>
           )}
-
-          <div className="keymap-menu-item">
-            <Tooltip arrow={true} placement="top" title="Save/Restore a keymap">
-              <IconButton
-                size="small"
-                onClick={(event) => {
-                  this.onClickOpenKeymapListPopover(event);
-                }}
-              >
-                <SwapHorizRoundedIcon />
-              </IconButton>
-            </Tooltip>
-            <KeymapListPopover
-              open={Boolean(this.state.keymapListPopoverPosition)}
-              onClose={() => {
-                this.onCloseKeymapListPopover();
-              }}
-              position={this.state.keymapListPopoverPosition}
-            />
-          </div>
 
           <div className="keymap-menu-item">
             <Tooltip
