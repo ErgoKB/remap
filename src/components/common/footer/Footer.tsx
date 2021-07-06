@@ -26,11 +26,11 @@ export default class Footer extends React.Component<
             2020-{moment().format('YYYY')}
           </span>
           <a
-            href="https://github.com/remap-keys"
+            href="https://github.com/Ergokb/remap"
             target={'_blank'}
             rel={'noreferrer'}
           >
-            Remap team
+            ErgoKB forked from Remap team.
           </a>
         </div>
         <div className="footer-contents">

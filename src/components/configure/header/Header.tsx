@@ -214,7 +214,7 @@ export default class Header extends React.Component<HeaderProps, HeaderState> {
 
           <div className="header-logo">
             <a
-              href="/"
+              href="https://www.ergokb.tw/"
               onMouseEnter={this.startLogoAnim.bind(this)}
               onMouseLeave={this.endLogoAnim.bind(this)}
             >
