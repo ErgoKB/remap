@@ -31,17 +31,21 @@ import LightingDialog from '../lighting/LightingDialog';
 import LayoutOptionPopover from '../layoutoption/LayoutOptionPopover.container';
 import { ImportFileIcon } from '../../common/icons/ImportFileIcon';
 import ImportDefDialog from '../importDef/ImportDefDialog.container';
-<<<<<<< HEAD
-import SwapHorizRoundedIcon from '@mui/icons-material/SwapHorizRounded';
+import ImportExportIcon from '@mui/icons-material/ImportExport';
+import InputIcon from '@mui/icons-material/Input';
 import ViewComfyIcon from '@mui/icons-material/ViewComfy';
-import KeymapListPopover from '../keymaplist/KeymapListPopover.container';
-=======
-import ViewComfyIcon from '@material-ui/icons/ViewComfy';
->>>>>>> 3134e7f (remove unwanted buttons and home path)
 import { sendEventToGoogleAnalytics } from '../../../utils/GoogleAnalytics';
 import { Restore as RestoreIcon } from '@mui/icons-material';
+import { KeycodeList } from '../../../services/hid/KeycodeList';
 
 type OwnProp = {};
+
+type KeymapExported = {
+  name: string;
+  vendorId: number;
+  productId: number;
+  keycodes: { [pos: string]: number }[];
+};
 
 type KeymapMenuPropsType = OwnProp &
   Partial<KeymapMenuStateType> &
@@ -206,6 +210,96 @@ export default class KeymapMenu extends React.Component<
     this.setState({ subMenuAnchorEl: null, openConfirmDialog: true });
   }
 
+  private importKeymap() {
+    const upload = document.createElement('input');
+    upload.type = 'file';
+    upload.accept = '.json';
+    upload.addEventListener('change', () => {
+      if (!upload.files || upload.files.length === 0) {
+        return;
+      }
+      const fileName = upload.files[0];
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const keymapText = e.target?.result || '';
+        if (keymapText === '') {
+          this.props.error!('Can not open file');
+          return;
+        }
+        const keymapImported: KeymapExported = JSON.parse(
+          keymapText.toString()
+        );
+        if (
+          keymapImported.name !== this.props.keyboardDefinition?.name ||
+          keymapImported.vendorId !==
+            parseInt(this.props.keyboardDefinition?.vendorId || '0') ||
+          keymapImported.productId !==
+            parseInt(this.props.keyboardDefinition?.productId || '0')
+        ) {
+          this.props.error!('This keymap is not for your keyboard');
+          return;
+        }
+        let keycodes: { [pos: string]: IKeymap }[] = [];
+        const savedKeycodes: { [pos: string]: number }[] =
+          keymapImported.keycodes;
+        const keymaps: { [pos: string]: IKeymap }[] = this.props.keymaps!;
+        for (let i = 0; i < keymaps.length; i++) {
+          const keymap = keymaps[i];
+          const savedCode = savedKeycodes[i];
+          const changes: { [pos: string]: IKeymap } = {};
+          if (i < savedKeycodes.length) {
+            Object.keys(keymap).forEach((pos) => {
+              if (keymap[pos].code != savedCode[pos]) {
+                changes[pos] = KeycodeList.getKeymap(
+                  savedCode[pos],
+                  'en-us',
+                  undefined
+                );
+              }
+            });
+          }
+          keycodes.push(changes);
+        }
+        this.props.applySavedKeymapData!(keycodes);
+      };
+      reader.readAsText(fileName);
+    });
+    upload.click();
+  }
+
+  private exportKeymap() {
+    const keymaps: { [pos: string]: IKeymap }[] = this.props.keymaps!;
+    const keycodes: { [pos: string]: number }[] = [];
+    for (let i = 0; i < keymaps.length; i++) {
+      const keyMap: { [pos: string]: number } = {};
+      const km = keymaps[i];
+      Object.keys(km).forEach((pos) => {
+        keyMap[pos] = km[pos].code;
+      });
+      keycodes.push(keyMap);
+    }
+
+    const keyboardName = this.props.keyboardDefinition?.name || 'unknown';
+    const vendorId = parseInt(this.props.keyboardDefinition?.vendorId || '0');
+    const productId = parseInt(this.props.keyboardDefinition?.productId || '0');
+    const keymapExported: KeymapExported = {
+      name: keyboardName,
+      vendorId,
+      productId,
+      keycodes,
+    };
+    const json = JSON.stringify(keymapExported);
+    const blob = new Blob([json], { type: 'application/json' });
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = href;
+    link.download = `${keyboardName}-keymap.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   render() {
     const isLightingAvailable = LightingDialog.isLightingAvailable(
       this.props.keyboardDefinition!.lighting
@@ -269,6 +363,22 @@ export default class KeymapMenu extends React.Component<
               />
             </div>
           )}
+
+          <div className="keymap-menu-item">
+            <Tooltip arrow={true} placement="top" title="import keymap">
+              <IconButton size="small" onClick={() => this.importKeymap()}>
+                <InputIcon />
+              </IconButton>
+            </Tooltip>
+          </div>
+
+          <div className="keymap-menu-item">
+            <Tooltip arrow={true} placement="top" title="export keymap">
+              <IconButton size="small" onClick={() => this.exportKeymap()}>
+                <ImportExportIcon />
+              </IconButton>
+            </Tooltip>
+          </div>
 
           <div className="keymap-menu-item">
             <Tooltip

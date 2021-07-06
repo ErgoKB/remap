@@ -8,6 +8,7 @@ import {
   NotificationActions,
 } from '../../../actions/actions';
 import { hidActionsThunk } from '../../../actions/hid.action';
+import { IKeymap } from '../../../services/hid/Hid';
 
 const mapStateToProps = (state: RootState) => {
   return {
@@ -39,6 +40,10 @@ const mapDispatchToProps = (_dispatch: any) => {
     },
     error: (msg: string) => {
       _dispatch(NotificationActions.addError(msg));
+    },
+    applySavedKeymapData: (keymaps: { [pos: string]: IKeymap }[]) => {
+      _dispatch(KeydiffActions.clearKeydiff());
+      _dispatch(AppActions.remapsSetKeys(keymaps));
     },
   };
 };
