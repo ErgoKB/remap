@@ -28,12 +28,16 @@ type OwnProps = {
   onChange: (direction: IModDirection, mods: IMod[]) => void;
 };
 
-type OwnState = {};
+type OwnState = {
+  useModifiers: boolean;
+};
 
 export default class Modifiers extends React.Component<OwnProps, OwnState> {
   constructor(props: OwnProps | Readonly<OwnProps>) {
     super(props);
-    this.state = {};
+    this.state = {
+      useModifiers: props.mods.length !== 0,
+    };
   }
 
   static decode(code: number): { direction: IModDirection; mods: IMod[] } {
@@ -103,6 +107,17 @@ export default class Modifiers extends React.Component<OwnProps, OwnState> {
     this.emitOnChange(this.props.direction, mods);
   }
 
+  private updateUseModifiersState(checked: boolean) {
+    this.setState({ useModifiers: checked });
+    this.emitOnChange(this.props.direction, []);
+  }
+
+  componentDidUpdate(prevProps: OwnProps) {
+    if (prevProps.mods.length !== this.props.mods.length) {
+      this.setState({ useModifiers: this.props.mods.length !== 0 });
+    }
+  }
+
   render() {
     const mods = this.props.mods;
     const ctrl = mods.includes(MOD_CTL);
@@ -110,6 +125,7 @@ export default class Modifiers extends React.Component<OwnProps, OwnState> {
     const alt = mods.includes(MOD_ALT);
     const gui = mods.includes(MOD_GUI);
     const direction = '' + this.props.direction;
+    const useModifiers = this.state.useModifiers;
     return (
       <React.Fragment>
         <div
@@ -120,81 +136,95 @@ export default class Modifiers extends React.Component<OwnProps, OwnState> {
         >
           Modifiers
         </div>
-        <RadioGroup
-          row
-          aria-label="position"
-          name="left-right"
-          defaultValue={'0'}
-          value={direction}
-          onChange={(e, value) => {
-            this.updateRadioState(value);
+        <FormControlLabel
+          value="useModifiers"
+          disabled={this.props.disabled == true}
+          checked={useModifiers}
+          onChange={(e, checked) => {
+            this.updateUseModifiersState(checked);
           }}
-        >
-          <FormControlLabel
-            value="0"
-            disabled={
-              this.props.disabled === true ||
-              this.props.disableDirection === true
-            }
-            control={<Radio color="primary" />}
-            label="Left"
-          />
-          <FormControlLabel
-            value="1"
-            disabled={
-              this.props.disabled == true ||
-              this.props.disableDirection === true
-            }
-            control={<Radio color="primary" />}
-            label="Right"
-          />
-        </RadioGroup>
-        <FormGroup
-          aria-label="position"
-          row
-          style={{ justifyContent: 'space-between' }}
-        >
-          <FormControlLabel
-            value="control"
-            disabled={this.props.disabled == true}
-            checked={ctrl}
-            onChange={(e, checked) => {
-              this.updateCheckboxState('ctrl', checked);
-            }}
-            control={<Checkbox color="primary" />}
-            label="Ctrl"
-          />
-          <FormControlLabel
-            value="shift"
-            disabled={this.props.disabled == true}
-            checked={shift}
-            onChange={(e, checked) => {
-              this.updateCheckboxState('shift', checked);
-            }}
-            control={<Checkbox color="primary" />}
-            label="Shift"
-          />
-          <FormControlLabel
-            value="alt"
-            disabled={this.props.disabled == true}
-            onChange={(e, checked) => {
-              this.updateCheckboxState('alt', checked);
-            }}
-            checked={alt}
-            control={<Checkbox color="primary" />}
-            label="Alt"
-          />
-          <FormControlLabel
-            value="gui"
-            disabled={this.props.disabled == true}
-            onChange={(e, checked) => {
-              this.updateCheckboxState('gui', checked);
-            }}
-            checked={gui}
-            control={<Checkbox color="primary" />}
-            label="Win/Cmd"
-          />
-        </FormGroup>
+          control={<Checkbox color="primary" />}
+          label="Use Modifiers"
+        />
+        {useModifiers && (
+          <div>
+            <RadioGroup
+              row
+              aria-label="position"
+              name="left-right"
+              defaultValue={'0'}
+              value={direction}
+              onChange={(e, value) => {
+                this.updateRadioState(value);
+              }}
+            >
+              <FormControlLabel
+                value="0"
+                disabled={
+                  this.props.disabled === true ||
+                  this.props.disableDirection === true
+                }
+                control={<Radio color="primary" />}
+                label="Left"
+              />
+              <FormControlLabel
+                value="1"
+                disabled={
+                  this.props.disabled == true ||
+                  this.props.disableDirection === true
+                }
+                control={<Radio color="primary" />}
+                label="Right"
+              />
+            </RadioGroup>
+            <FormGroup
+              aria-label="position"
+              row
+              style={{ justifyContent: 'space-between' }}
+            >
+              <FormControlLabel
+                value="control"
+                disabled={this.props.disabled == true}
+                checked={ctrl}
+                onChange={(e, checked) => {
+                  this.updateCheckboxState('ctrl', checked);
+                }}
+                control={<Checkbox color="primary" />}
+                label="Ctrl"
+              />
+              <FormControlLabel
+                value="shift"
+                disabled={this.props.disabled == true}
+                checked={shift}
+                onChange={(e, checked) => {
+                  this.updateCheckboxState('shift', checked);
+                }}
+                control={<Checkbox color="primary" />}
+                label="Shift"
+              />
+              <FormControlLabel
+                value="alt"
+                disabled={this.props.disabled == true}
+                onChange={(e, checked) => {
+                  this.updateCheckboxState('alt', checked);
+                }}
+                checked={alt}
+                control={<Checkbox color="primary" />}
+                label="Alt"
+              />
+              <FormControlLabel
+                value="gui"
+                disabled={this.props.disabled == true}
+                onChange={(e, checked) => {
+                  this.updateCheckboxState('gui', checked);
+                }}
+                checked={gui}
+                control={<Checkbox color="primary" />}
+                label="Win/Cmd"
+              />
+            </FormGroup>
+          </div>
+        )}
       </React.Fragment>
     );
   }
