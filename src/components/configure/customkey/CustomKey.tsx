@@ -23,6 +23,7 @@ import {
   KeyLabelLangs,
 } from '../../../services/labellang/KeyLabelLangs';
 import { getMetaLabel } from '../../../services/labellang/KeyLabel';
+import WebKeycodeToHex from './WebKeycodeToHex';
 
 export const CUSTOMKEY_POPOVER_WIDTH = 400;
 export const CUSTOMKEY_POPOVER_HEIGHT = 240;
@@ -278,6 +279,16 @@ export default class CustomKey extends React.Component<OwnProps, OwnState> {
     }
   }
 
+  private handleKeydownSetKey(e: React.KeyboardEvent) {
+    const ret = KeycodeList.getKeymaps(
+      WebKeycodeToHex(e.code),
+      this.props.labelLang,
+      undefined
+    );
+    this.onChangeKey(ret.value);
+    e.preventDefault();
+  }
+
   render() {
     let desc = this.state.value?.desc || '';
     if (this.state.value && this.state.value.modifiers.length) {
@@ -339,6 +350,20 @@ export default class CustomKey extends React.Component<OwnProps, OwnState> {
             </Tabs>
           </AppBar>
           <TabPanel value={this.state.selectedTabIndex} index={TAB_INDEX_KEY}>
+            <div className="customkey-description">
+              Assign keycode by pressing any key
+            </div>
+            <TextField
+              variant="outlined"
+              label="focus and press any key"
+              size="small"
+              className="customkey-label"
+              onKeyDown={this.handleKeydownSetKey.bind(this)}
+              value=""
+            />
+            <div className="customkey-description">
+              Or find the code via search box.
+            </div>
             <TabKey
               value={this.state.value}
               desc={desc}

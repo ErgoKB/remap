@@ -202,7 +202,7 @@ export default class TabKey extends React.Component<TabKeyProps, OwnState> {
     return (
       <React.Fragment>
         <AutocompleteKeys
-          label="Keycode"
+          label="Search Keycode"
           keycodeOptions={this.basicKeymapsWithBmp}
           keycodeInfo={this.props.value}
           autoFocus={this.props.autoFocus}
